@@ -3,6 +3,10 @@ import World.world
 import scala.util.Random
 
 case class Hex(resources: Set[Resource], animals: Set[AnimalGroup]) {
+  def getAdjecentHexes(hex: Hex) = {
+
+  }
+
   def availableFoodFromNature(): Int = {
     resources
       .map(r => r.food())
@@ -11,7 +15,7 @@ case class Hex(resources: Set[Resource], animals: Set[AnimalGroup]) {
 
 
   // 6 x 3
-  def mapString(x:Int, y:Int, row:Int):String = {
+  def hexToConsole(x:Int, y:Int, row:Int):String = {
     val tot = resources.map(r => r.lev()).sum
     var colours = Map[(Int, Int), String]() // .withDefaultValue(Console.BLACK + Console.WHITE + " ")
     val ran = new Random(x + 13*y)
@@ -58,17 +62,6 @@ case class Hex(resources: Set[Resource], animals: Set[AnimalGroup]) {
       .mkString(" ")
 
   }
-
-  def tickResourcesInHex(): Set[Resource] = {
-    resources
-      .collect({case (r: Resource) =>  r.tickResource(resources)})
-      .flatten
-  }
-
-  def tickAnimalsInHex(): Set[AnimalGroup] = {
-    animals
-      .collect({case (r: AnimalGroup) =>  r.tick(availableFoodFromNature())})
-  }
 }
 
 
@@ -104,10 +97,14 @@ object World {
         val rs = h.resources
           .collect({case (r: Resource) =>  r.tickResource(h.resources)})
           .flatten
-        val as = h.animals
-          .collect({case (r: AnimalGroup) =>  r.tick(h.availableFoodFromNature())})
+        /*
+                val as = h.animals
+                  .collect({case (r: AnimalGroup) =>  r.tick(h.availableFoodFromNature())})
 
-        World.apply(x, y, rs, as)
+                val hs = h.animals
+                  .collect({case (a: AnimalGroup) =>  a.move(x,y)})
+        */
+        World.apply(x, y, rs, h.animals)
       }
     })
   }
@@ -190,7 +187,7 @@ object World {
         for( x <- minX until maxX+1 ) {
           findHex(x, y) match {
             case Some(h) =>
-              worldInAscii += f"${h.mapString(x, y, row)}%6s"+ HEX_GAP
+              worldInAscii += f"${h.hexToConsole(x, y, row)}%6s"+ HEX_GAP
 
             case _ => worldInAscii += "" + INDENT + HEX_GAP
           }
